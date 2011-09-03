@@ -37,6 +37,6 @@ class ApiCallTest(TestCase):
         item1 = _mention('english', 'twitter', 'neutral', 1315051701)
         self.set_api_response([item1])
 
-        mentions = list(do_api_call('python', 'twitter'))
+        mentions = list(do_api_call('python'))
 
         self.assertEqual(mentions, [item1])

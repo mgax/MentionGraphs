@@ -6,11 +6,10 @@ API_KEY = settings.UBERVU_API_KEY
 FIELDS = ['language', 'generator', 'sentiment', 'published']
 
 
-def do_api_call(keyword, generator):
+def do_api_call(keyword):
     base = 'http://api.contextvoice.com/1.2/mentions/search/mongo/?'
     url = base + urllib.urlencode({
         'q': keyword,
-        'generator': generator,
         'apikey': API_KEY,
     })
 
