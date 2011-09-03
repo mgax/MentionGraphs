@@ -1,2 +1,13 @@
 {% load expr %}
-hello frontend!
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+<body>
+    {% for platform in filters.platform %}
+        {{ platform }}
+    {% endfor %}
+</body>
+</html>
+
+

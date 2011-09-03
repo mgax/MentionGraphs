@@ -21,7 +21,8 @@ class ExprNode(template.Node):
                 try:
                   context[self.var_name] = eval(self.expr_string, d)
                 except Exception, e:
-                  raise e
+                  print 'Error in EXPR: %s - %s: %s' % (self.var_name, self.expr_string, e)
+#                  raise e
                 return ''
             else:
                 return str(eval(self.expr_string, d))
