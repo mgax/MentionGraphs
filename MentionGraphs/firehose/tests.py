@@ -45,18 +45,17 @@ class ApiCallTest(TestCase):
 class CrawlingTest(TestCase):
 
     def setUp(self):
-        self._api_mock = patch('MentionGraphs.firehose.crawl.do_api_call')
+        self._api_mock = patch('MentionGraphs.firehose.crawl'
+                               '.mention_stream_for_interval')
         self._mock_call = self._api_mock.start()
 
     def tearDown(self):
         self._api_mock.stop()
 
     def api_fixture(self, data):
-        data = data + [[]]
-        self._mock_call.side_effect = lambda *args: data.pop
+        self._mock_call.return_value = data
 
     def test_crawl_one_day_one_call(self):
-        from nose import SkipTest; raise SkipTest
         from crawl import index_day
         self.api_fixture([
             _mention('english', 'twitter', 'neutral', 1315051701),

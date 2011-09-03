@@ -39,27 +39,34 @@ def do_api_call(keyword, since, until):
     for mention in data['results']:
         yield {k: mention.get(k, None) for k in FIELDS}
 
-def index_day(keyword, target_date):
-    t0 = date_epoch(target_date)
-    t = end_of_day_epoch(target_date)
+def mention_stream_for_interval(keyword, since, until):
     log.info("Crawling mentions for %r on %s (%r -> %r)",
-             keyword, target_date, t0, t)
+             keyword, target_date, since, until)
 
     total_mentions = 0
-    stats = defaultdict(int)
     while True:
         count = 0
-        for count, mention in enumerate(do_api_call(keyword, t0, t), start=1):
-            for field in STATS_FIELDS:
-                stats[field, mention[field]] += 1
+        mentions = do_api_call(keyword, since, until)
+        for count, m in enumerate(mentions, start=1):
+            yield m
 
         if not count:
             break
 
         total_mentions += count
-        log.info("... %d mentions from %r", count, t)
+        log.info("... %d mentions from %r", count, until)
 
-        t = mention['published'] - 1
+        until = mention['published'] - 1
 
     log.info("... finished counting %d mentions", total_mentions)
+
+def index_day(keyword, target_date):
+    t0 = date_epoch(target_date)
+    t = end_of_day_epoch(target_date)
+    stats = defaultdict(int)
+
+    for mention in mention_stream_for_interval(t0, t):
+        for field in STATS_FIELDS:
+            stats[field, mention[field]] += 1
+
     return stats
