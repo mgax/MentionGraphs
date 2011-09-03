@@ -75,4 +75,3 @@ def index_day(keyword, target_date, resolution):
 
     return {day_start + resolution * i: day_buckets[i]
             for i in range(n_buckets)}
-    return day_buckets
