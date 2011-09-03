@@ -5,7 +5,7 @@ from django.test import TestCase
 from mock import patch
 
 
-def _mention(language, generator, sentiment, published):
+def _mention(published, language='english', generator='twitter', sentiment=None):
     return {
         'language': language,
         'generator': generator,
@@ -35,7 +35,7 @@ class ApiCallTest(TestCase):
 
     def test_api_call(self):
         from crawl import do_api_call
-        item1 = _mention('english', 'twitter', 'neutral', 1315051701)
+        item1 = _mention(1315051701)
         self.set_api_response([item1])
 
         mentions = list(do_api_call('python', 1315051000, 1315052000))
@@ -58,9 +58,9 @@ class CrawlingTest(TestCase):
     def test_crawl_one_day_one_call(self):
         from crawl import index_day
         self.api_fixture([
-            _mention('english', 'twitter', 'neutral', 1315051701),
-            _mention('german', 'twitter', 'positive', 1315051704),
-            _mention('english', 'facebook', 'negative', 1315051708),
+            _mention(1315051701, 'english', 'twitter', 'neutral'),
+            _mention(1315051704, 'german', 'twitter', 'positive'),
+            _mention(1315051708, 'english', 'facebook', 'negative'),
         ])
 
         stats = index_day('python', date(2011, 9, 3), timedelta(days=1))
@@ -81,16 +81,13 @@ class CrawlingTest(TestCase):
         day = date(2011, 9, 3)
         eday = to_epoch(day)
 
-        def _entry(lang, minute):
-            return _mention(lang, 'twitter', None, eday + minute * 60)
-
         self.api_fixture([
-            _entry('english', 20),
-            _entry('english', 30),
-            _entry('german', 40),
-            _entry('german', 90),
-            _entry('german', 100),
-            _entry('french', 110),
+            _mention(eday + 60 * 20, 'english'),
+            _mention(eday + 60 * 30, 'english'),
+            _mention(eday + 60 * 40, 'german'),
+            _mention(eday + 60 * 90, 'german'),
+            _mention(eday + 60 * 100, 'german'),
+            _mention(eday + 60 * 110, 'french'),
         ])
 
         stats = index_day('python', day, timedelta(hours=1))
