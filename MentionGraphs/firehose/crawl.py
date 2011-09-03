@@ -40,8 +40,7 @@ def do_api_call(keyword, since, until):
         yield {k: mention.get(k, None) for k in FIELDS}
 
 def mention_stream_for_interval(keyword, since, until):
-    log.info("Crawling mentions for %r on %s (%r -> %r)",
-             keyword, target_date, since, until)
+    log.info("Crawling mentions for %r (%r -> %r)", keyword, since, until)
 
     total_mentions = 0
     while True:
@@ -56,7 +55,7 @@ def mention_stream_for_interval(keyword, since, until):
         total_mentions += count
         log.info("... %d mentions from %r", count, until)
 
-        until = mention['published'] - 1
+        until = m['published'] - 1
 
     log.info("... finished counting %d mentions", total_mentions)
 
@@ -68,7 +67,7 @@ def index_day(keyword, target_date, resolution):
     n_buckets = int(24*60*60/res_seconds)
     day_buckets = [defaultdict(int) for i in range(n_buckets)]
 
-    for mention in mention_stream_for_interval(t0, t):
+    for mention in mention_stream_for_interval(keyword, t0, t):
         time_in_day = mention['published'] - t0
         bucket = day_buckets[int(time_in_day / res_seconds)]
         for field in STATS_FIELDS:

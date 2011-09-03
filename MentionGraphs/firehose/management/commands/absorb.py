@@ -7,9 +7,11 @@ class Command(BaseCommand):
 
     def handle(self, keyword, day, **kwargs):
         from pprint import pprint
-        from datetime import date
+        from datetime import date, timedelta
         import logging
         l = logging.getLogger('MentionGraphs.firehose.crawl')
         l.setLevel(logging.INFO)
         l.addHandler(logging.StreamHandler(self.stderr))
-        pprint(dict(index_day(keyword, date(*map(int, day.split('-'))))))
+
+        day = date(*map(int, day.split('-')))
+        pprint(dict(index_day(keyword, day, timedelta(hours=1))))
