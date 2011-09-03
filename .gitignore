@@ -1,1 +1,3 @@
 *.pyc
+/var/*
+!/var/README.txt
