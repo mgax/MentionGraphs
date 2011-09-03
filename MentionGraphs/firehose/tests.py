@@ -1,6 +1,6 @@
 from StringIO import StringIO
 import json
-from datetime import date
+from datetime import date, time, datetime, timedelta
 from django.test import TestCase
 from mock import patch
 
@@ -63,12 +63,42 @@ class CrawlingTest(TestCase):
             _mention('english', 'facebook', 'negative', 1315051708),
         ])
 
-        stats = index_day('python', date(2011, 9, 3))
+        stats = index_day('python', date(2011, 9, 3), timedelta(days=1))
 
-        self.assertEqual(stats['language', 'english'], 2)
-        self.assertEqual(stats['language', 'german'], 1)
-        self.assertEqual(stats['generator', 'twitter'], 2)
-        self.assertEqual(stats['generator', 'facebook'], 1)
-        self.assertEqual(stats['sentiment', 'negative'], 1)
-        self.assertEqual(stats['sentiment', 'neutral'], 1)
-        self.assertEqual(stats['sentiment', 'positive'], 1)
+        bucket = stats.values()[0]
+
+        self.assertEqual(bucket['language', 'english'], 2)
+        self.assertEqual(bucket['language', 'german'], 1)
+        self.assertEqual(bucket['generator', 'twitter'], 2)
+        self.assertEqual(bucket['generator', 'facebook'], 1)
+        self.assertEqual(bucket['sentiment', 'negative'], 1)
+        self.assertEqual(bucket['sentiment', 'neutral'], 1)
+        self.assertEqual(bucket['sentiment', 'positive'], 1)
+
+    def test_split_into_intervals(self):
+        from crawl import index_day, to_epoch
+
+        day = date(2011, 9, 3)
+        eday = to_epoch(day)
+
+        def _entry(lang, minute):
+            return _mention(lang, 'twitter', None, eday + minute * 60)
+
+        self.api_fixture([
+            _entry('english', 20),
+            _entry('english', 30),
+            _entry('german', 40),
+            _entry('german', 90),
+            _entry('german', 100),
+            _entry('french', 110),
+        ])
+
+        stats = index_day('python', day, timedelta(hours=1))
+
+        bucket0 = stats[datetime.combine(day, time())]
+        self.assertEqual(bucket0['language', 'english'], 2)
+        self.assertEqual(bucket0['language', 'german'], 1)
+
+        bucket1 = stats[datetime.combine(day, time(1))]
+        self.assertEqual(bucket1['language', 'german'], 2)
+        self.assertEqual(bucket1['language', 'french'], 1)
