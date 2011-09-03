@@ -11,6 +11,7 @@ urlpatterns = patterns('',
 
     url(r'^$', 'MentionGraphs.frontend.views.index', name='index'),
 
+    url(r'^api$', 'MentionGraphs.frontend.views.api', name='api'),
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
