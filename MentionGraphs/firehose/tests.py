@@ -42,10 +42,23 @@ class ApiCallTest(TestCase):
 
         self.assertEqual(mentions, [item1])
 
+class CrawlingTest(TestCase):
+
+    def setUp(self):
+        self._api_mock = patch('MentionGraphs.firehose.crawl.do_api_call')
+        self._mock_call = self._api_mock.start()
+
+    def tearDown(self):
+        self._api_mock.stop()
+
+    def api_fixture(self, data):
+        data = data + [[]]
+        self._mock_call.side_effect = lambda *args: data.pop
+
     def test_crawl_one_day_one_call(self):
         from nose import SkipTest; raise SkipTest
         from crawl import index_day
-        self.set_api_response([
+        self.api_fixture([
             _mention('english', 'twitter', 'neutral', 1315051701),
             _mention('german', 'twitter', 'positive', 1315051704),
             _mention('english', 'facebook', 'negative', 1315051708),
