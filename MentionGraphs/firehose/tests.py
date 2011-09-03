@@ -4,6 +4,14 @@ from django.test import TestCase
 from mock import patch
 
 
+def _mention(language, generator, sentiment, published):
+    return {
+        'language': language,
+        'generator': generator,
+        'sentiment': sentiment,
+        'published': published,
+    }
+
 class ApiCallTest(TestCase):
 
     def setUp(self):
@@ -26,12 +34,7 @@ class ApiCallTest(TestCase):
 
     def test_api_call(self):
         from crawl import do_api_call
-        item1 = {
-            'language': 'english',
-            'generator': 'twitter',
-            'sentiment': 'neutral',
-            'published': 1315051701,
-        }
+        item1 = _mention('english', 'twitter', 'neutral', 1315051701)
         self.set_api_response([item1])
 
         mentions = list(do_api_call('python', 'twitter'))
