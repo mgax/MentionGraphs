@@ -9,6 +9,8 @@ urlpatterns = patterns('',
     # url(r'^$', 'MentionGraphs.views.home', name='home'),
     # url(r'^MentionGraphs/', include('MentionGraphs.foo.urls')),
 
+    url(r'^$', 'MentionGraphs.frontend.views.index', name='index'),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
