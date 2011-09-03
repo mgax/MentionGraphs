@@ -11,10 +11,13 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+
+app_prefix = os.path.dirname(__file__)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(os.path.dirname(__file__), '..', 'var', 'db.sqlite'),
+        'NAME': os.path.join(app_prefix, '..', 'var', 'db.sqlite'),
     }
 }
 
@@ -104,7 +107,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    'MentionGraphs/frontend/templates',
+    os.path.join(app_prefix, 'frontend/templates'),
 )
 
 INSTALLED_APPS = (
