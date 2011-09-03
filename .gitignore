@@ -1,3 +1,4 @@
 *.pyc
 /var/*
 !/var/README.txt
+/MentionGraphs/localsettings.py

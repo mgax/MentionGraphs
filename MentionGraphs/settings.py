@@ -149,3 +149,10 @@ LOGGING = {
         },
     }
 }
+
+UBERVU_API_KEY = ''
+
+try:
+    from localsettings import *
+except ImportError:
+    pass

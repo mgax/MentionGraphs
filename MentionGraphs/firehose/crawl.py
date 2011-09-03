@@ -1,7 +1,8 @@
+from django.conf import settings
 import urllib
 import json
 
-API_KEY = 'asdf'
+API_KEY = settings.UBERVU_API_KEY
 FIELDS = ['language', 'generator', 'sentiment', 'published']
 
 
