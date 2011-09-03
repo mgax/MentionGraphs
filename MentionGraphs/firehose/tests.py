@@ -1,5 +1,6 @@
 from StringIO import StringIO
 import json
+from datetime import date
 from django.test import TestCase
 from mock import patch
 
@@ -40,3 +41,21 @@ class ApiCallTest(TestCase):
         mentions = list(do_api_call('python'))
 
         self.assertEqual(mentions, [item1])
+
+    def test_crawl_one_day_one_call(self):
+        from crawl import index_day
+        self.set_api_response([
+            _mention('english', 'twitter', 'neutral', 1315051701),
+            _mention('german', 'twitter', 'positive', 1315051704),
+            _mention('english', 'facebook', 'negative', 1315051708),
+        ])
+
+        stats = index_day('python', date(2011, 9, 3))
+
+        self.assertEqual(stats['language', 'english'], 2)
+        self.assertEqual(stats['language', 'german'], 1)
+        self.assertEqual(stats['generator', 'twitter'], 2)
+        self.assertEqual(stats['generator', 'facebook'], 1)
+        self.assertEqual(stats['sentiment', 'negative'], 1)
+        self.assertEqual(stats['sentiment', 'neutral'], 1)
+        self.assertEqual(stats['sentiment', 'positive'], 1)
