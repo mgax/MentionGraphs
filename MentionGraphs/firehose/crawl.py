@@ -5,12 +5,11 @@ import time
 from datetime import timedelta
 from collections import defaultdict
 import logging
-from MentionGraphs import filter_names
 
 log = logging.getLogger(__name__)
 
 API_KEY = settings.UBERVU_API_KEY
-STATS_FIELDS = filter_names.filters.keys()
+STATS_FIELDS = ['language', 'generator', 'sentiment']
 FIELDS = STATS_FIELDS + ['published']
 RESPONSE_LIMIT = 100
 
