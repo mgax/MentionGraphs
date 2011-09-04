@@ -103,6 +103,8 @@ class CachingMentionCounter(MentionCounter):
         cache_filename = self.cache_filename_base(day) + '.json.gz'
 
         if os.path.isfile(cache_filename):
+            log.info('found stream in cache: %r on %s', self.keyword, day)
+
             with gzip.open(cache_filename, 'rb') as f:
                 return json.load(f)
 
