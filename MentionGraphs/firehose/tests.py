@@ -107,17 +107,11 @@ class SaveToDatabaseTest(TestCase):
         from crawl import to_epoch
         from models import Metric, Datapoint, save_data
 
-        day = date(2011, 9, 3)
-        eday = to_epoch(day)
-        when = datetime.combine(day, time())
-        data = {
-            when: {
-                ('language', 'english'): 13,
-                ('language', 'german'): 22,
-            }
-        }
-
-        save_data('python', data)
+        when = datetime.combine(date(2011, 9, 3), time())
+        save_data('python', {when: {
+            ('language', 'english'): 13,
+            ('language', 'german'): 22,
+        }})
 
         self.assertEqual(Datapoint.objects.count(), 2)
         m_german = Metric.objects.get(name='language', value='german')
@@ -130,10 +124,7 @@ class SaveToDatabaseTest(TestCase):
         from crawl import to_epoch
         from models import Metric, Datapoint, save_data
 
-        day = date(2011, 9, 3)
-        eday = to_epoch(day)
-        when = datetime.combine(day, time())
-
+        when = datetime.combine(date(2011, 9, 3), time())
         save_data('python', {when: {
             ('language', 'german'): 45,
         }})
