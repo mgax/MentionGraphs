@@ -1,17 +1,43 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from django.views.decorators.http import require_POST, require_GET
-from filter_names import filters, streams
-
-@require_GET
+from MentionGraphs.firehose.models import Datapoint
+import datetime
+import json
+import time
 def index(request):
-    context = {}
-    context['filters'] = filters
-    context['streams'] = streams
-    return render_to_response('index.html',
-     context, context_instance=RequestContext(request))
+    return render_to_response('index.html', {})
+
+from django import template
+register = template.Library()
+@register.filter
+def epoch(value):
+    try:
+        return int(time.mktime(value.timetuple())*1000)
+    except AttributeError:
+        return ''
 
 def api(request):
-    return HttpResponse('Hello World')
+    params = request.GET
+#    since = params['since']
+#    until = params['until']
+#    query = params['q']
+    vmetric = params['metric']
+    
+#    import pdb;pdb.set_trace()
+    dataset = Datapoint.objects.filter(
+#	time__gte=since
+#    ).filter(
+#	time__lt=until
+#    ).filter(
+        metric.name=vmetric
+    )
+    response = []
+    for item in dataset:
+       entry={}
+#       entry['DATE']=item.time.strftime('%d-%m-%Y')
+#       entry['TIME']=item.time.strftime('%H:%M:%S')
+#       entry['VOLUME']=item.value
+       entry[epoch(item.time)]=item.count
+       print(item.time.strftime('%Y'))
+       response.append(entry)
+    return HttpResponse(json.dumps(response), mimetype="application/json")
