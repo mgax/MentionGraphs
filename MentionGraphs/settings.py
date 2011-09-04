@@ -13,13 +13,16 @@ MANAGERS = ADMINS
 
 
 app_prefix = os.path.dirname(__file__)
+var_prefix = os.path.join(app_prefix, '..', 'var')
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(app_prefix, '..', 'var', 'db.sqlite'),
+        'NAME': os.path.join(var_prefix, 'db.sqlite'),
     }
 }
+
+FIREHOSE_DOWNLOAD_CACHE = os.path.join(var_prefix, 'cache')
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

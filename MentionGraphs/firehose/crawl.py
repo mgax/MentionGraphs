@@ -121,4 +121,6 @@ class CachingMentionCounter(MentionCounter):
                 json.dump(data, f)
             os.rename(tmp_cache_filename, cache_filename)
 
+            log.info('cached stream for %r on %s', self.keyword, day)
+
             return data
