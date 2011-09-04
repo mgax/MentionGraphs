@@ -6,3 +6,8 @@ filters = {
         'sentiment': ['all', 'positive', 'neutral', 'negative'],
         'reach': ['all', 'XS', 'S', 'M', 'L', 'XL', 'XXL'],
     }
+streams = {
+        ('RadianSix', 'radiansix'),
+        ('Apple', 'apple'),
+        ('Ice Coca Cola', 'coca cola'),
+    }

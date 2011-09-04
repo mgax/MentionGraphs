@@ -8,6 +8,7 @@
             font-size: 16px;
             font-family: Helvetica, Arial, Verdana;
             background-color: #ECEEEF;
+            color: #555;
         }
         .container {
             width: 100%;
@@ -50,7 +51,7 @@
             float: left;
             margin-left: 10px;
         }
-        .filters span {
+        .filters .filter span {
             width: 90px;
             float: left;
         }
@@ -162,10 +163,9 @@
             }
             
             var url ="/api";
-            api_call = function(key, value) {
-                console.log(key, value);
+            api_call = function(key, value, stream) {
                 $.ajax({
-                    url: "/api/?"+key+"="+value,
+                    url: "/api/?"+"stream="+stream+"&"+key+"="+value,
                     ype: 'GET',
                     dataType: 'json',
                     timeout: 2000,
@@ -176,14 +176,28 @@
                 });
             }
             
-            $(".filters select").change(function () {
-                $.each($(".filters select").not(this), function(i, val) {
+            $(".filters .filter select").change(function () {
+                $.each($(".filters .filter select").not(this), function(i, val) {
                     $(val[0]).attr('selected', 'selected');
                 });
                 var i = this.value.indexOf("&"),
                     key = this.value.slice(0, i),
-                    value = this.value.slice(i+1);
-                api_call(key, value);
+                    value = this.value.slice(i+1),
+                    stream = $(".filters .keyword option:selected").val();
+                api_call(key, value, stream);
+            });
+
+            $(".filters .keyword select").change(function () {
+                var filter;
+                $.each($(".filters .filter option:selected"), function(i, val) {
+                    if ($(val).index() !== 0)
+                        filter = $(val).val();
+                });
+                var i = filter.indexOf("&"),
+                    key = filter.slice(0, i),
+                    value = filter.slice(i+1),
+                    stream = $(".filters .keyword option:selected").val();
+                api_call(key, value, stream);
             });
 
             create_chart();
@@ -201,24 +215,31 @@
         </div>
         <div class="content-parent">
             <div class="content">
-                <div class="filters">
-                    <div class="keyword">
-                        Select keyord:
-                    </div>
-                    <div class="limit"> (Only a filter can be applied at a time)</div>
-                    {% for filter in filters %}
-                    <div class="filter">
-                        <span>{{ filter|capfirst }}:</span>
-                        <select>
-                        {% for key in filters|hash:filter %}
-                            <option value="{{ filter }}&{{ key }}">{{ key|capfirst }}</option>
+                <div class="historic-monitor">
+                    <div class="filters">
+                        <div class="keyword">
+                            Select <span style="font-weight:bolder; font-size:18px; color: #000;">stream</span>:
+                            <select>
+                                {% for stream_name, stream_value in streams %}
+                                    <option value="{{ stream_value }}">{{ stream_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="limit"> (Only a filter can be applied at a time)</div>
+                        {% for filter in filters %}
+                        <div class="filter">
+                            <span>{{ filter|capfirst }}:</span>
+                            <select>
+                            {% for key in filters|hash:filter %}
+                                <option value="{{ filter }}&{{ key }}">{{ key|capfirst }}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
                         {% endfor %}
-                        </select>
                     </div>
-                    {% endfor %}
-                </div>
-                
-                <div id="mentions-graph" style="height:410px; margin: 0 2em; min-width: 700px">
+                    
+                    <div id="mentions-graph" style="height:410px; margin: 0 2em; min-width: 700px">
+                    </div>
                 </div>
             </div>
         </div>
