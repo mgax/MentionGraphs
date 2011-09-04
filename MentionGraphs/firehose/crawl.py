@@ -66,18 +66,19 @@ class MentionCounter(object):
         self.keyword = keyword
         self.resolution = resolution
 
-    def stream_for_interval(self, t0, t):
+    def stream_for_day(self, day):
+        t0 = to_epoch(datetime.combine(day, time()))
+        t = end_of_day_epoch(day)
         return mention_stream_for_interval(self.keyword, t0, t)
 
-    def count(self, target_date):
-        day_start = datetime.combine(target_date, time())
+    def count(self, day):
+        day_start = datetime.combine(day, time())
         t0 = to_epoch(day_start)
-        t = end_of_day_epoch(target_date)
         res_seconds = self.resolution.total_seconds()
         n_buckets = int(24*60*60/res_seconds)
         day_buckets = [defaultdict(int) for i in range(n_buckets)]
 
-        for mention in self.stream_for_interval(t0, t):
+        for mention in self.stream_for_day(day):
             time_in_day = mention['published'] - t0
             bucket = day_buckets[int(time_in_day / res_seconds)]
             for field in STATS_FIELDS:
