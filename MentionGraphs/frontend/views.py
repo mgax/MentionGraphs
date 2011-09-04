@@ -16,6 +16,7 @@ def epoch(value):
     except AttributeError:
         return ''
 
+@require_GET
 def api(request):
     for k,v in request.GET.items():
         if k == 'stream':
