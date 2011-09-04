@@ -47,7 +47,11 @@
             box-shadow: 0 0 6px 2px #888;
             background-color: #fff;
         }
-        .historic-monitor .title {
+        .historic-monitor, .realtime-monitor {
+            float: left;
+            width: 1020px;
+        }
+        .historic-monitor .title, .realtime-monitor .title {
             width: 80%;
             margin: 0px auto;
             border-bottom: 1px solid #ccc;
@@ -56,6 +60,9 @@
             margin-bottom: 30px;
             font-size: 25px;
             font-weight: bolder;
+        }
+        .realtime-monitor {
+            margin-top: 100px;
         }
         .filters {
             float: left;
@@ -259,12 +266,38 @@
                     </div>
                 </div>
                 <div class="realtime-monitor">
+                    <div class="title" align="center">
+                        RealTime Monitor
+                    </div>
+                    <div class="filters">
+                        <div class="keyword">
+                            
+                            Add <span style="font-weight:bolder; font-size:18px; color: #000;">stream</span>:
+                            <select>
+                                {% for stream_name, stream_value in streams %}
+                                    <option value="{{ stream_value }}">{{ stream_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="limit"> (Only a filter can be applied at a time)</div>
+                        {% for filter in filters %}
+                        <div class="filter">
+                            <span>{{ filter|capfirst }}:</span>
+                            <select>
+                            {% for key in filters|hash:filter %}
+                                <option value="{{ filter }}&{{ key }}">{{ key|capfirst }}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                        {% endfor %}
+                    </div>
                     <div id="realtime-graph" style="height:420px; margin: 0 2em; min-width: 700px">
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+                
+            </div> {% comment %} endof content {% endcomment %}
+        </div> {% comment %} endof content-parent {% endcomment %}
+    </div> {% comment %} endof container {% endcomment %}
 </body>
 </html>
 

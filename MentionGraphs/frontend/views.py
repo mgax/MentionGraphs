@@ -13,5 +13,6 @@ def index(request):
     return render_to_response('index.html',
      context, context_instance=RequestContext(request))
 
+@require_GET
 def api(request):
     return HttpResponse('Hello World')
