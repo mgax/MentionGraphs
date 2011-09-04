@@ -1,12 +1,228 @@
-{% load expr %}
+{% load template_filters %}
 <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
+    <style type="text/css">
+        body {
+            margin: 0px;
+            font-size: 16px;
+            font-family: Helvetica, Arial, Verdana;
+            background-color: #ECEEEF;
+        }
+        .container {
+            width: 100%;
+            margin: 0px auto;         
+        }
+        .header {
+            height: 400px;
+            padding: 10px;
+            background: #DAE4EC;
+            background: -webkit-gradient(linear, left top, left bottom, from(#777), to(#fefefe));
+            background: -moz-linear-gradient(top,  #aaa,  #fff);
+            filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#aaa', endColorstr='#fff');
 
+            background: url(http://d284gtceqi4kf4.cloudfront.net/ubervu_public/static/ubervu_public/img/other/home-bgr.png);
+        }
+        .header .title {
+            font-size: 30px;
+            text-align:center;
+            color: white;
+            font-weight: bold;
+        }
+        .header .title img {
+            vertical-align: middle;
+        }
+        .content-parent {
+            width: 1020px;
+            margin: 0px auto;
+            margin-top: -330px;
+        }
+        .content {
+            padding-top: 50px;
+            float: left;
+            margin-left: 3px;
+            width: 1014px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 6px 2px #888;
+            background-color: #fff;
+        }
+        .filters {
+            float: left;
+            margin-left: 10px;
+        }
+        .filters span {
+            width: 90px;
+            float: left;
+        }
+        .filters .filter {
+            padding-top: 5px;
+            padding-bottom: 10px;
+        }
+        .filters .limit {
+            font-size: 12px;
+            color: red;
+        }
+        .clearboth {
+            clear: both;
+        }
+        #mentions-graph {
+            float: left;
+        }
+    </style>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://raw.github.com/highslide-software/highcharts.com/stock2/js/highstock.src.js"></script>
+
+    <script type="text/javascript">
+        var chart,
+            date = 1306886400000,
+            data = [];
+            for (i=0; i<2200; ++i)
+                data.push([date+3600*i*1000, Math.round(Math.random()*1000)]);
+        //Highcharts.theme = { colors: ['#4572A7'] };
+        $(function() {
+            function create_chart() {
+                window.chart = new Highcharts.StockChart({
+                    chart: {
+                        renderTo: 'mentions-graph'
+                    },
+
+                    rangeSelector: {
+                        buttons: [{
+                            type: 'minute',
+                            count: 60*30,
+                            text: '1 day'
+                        }, {
+                            type: 'day',
+                            count: 3,
+                            text: '3 days'
+                        }, {
+                            type: 'week',
+                            count: 1,
+                            text: '1 week'
+                        }, {
+                            type: 'week',
+                            count: 2,
+                            text: '2 weeks'
+                        }, {
+                            type: 'month',
+                            count: 1,
+                            text: '1 month'
+                        }, {
+                            type: 'all',
+                            text: 'All'
+                        }],
+                        inputStyle: {
+                            color: '#039',
+                            fontWeight: 'bold'
+                        },
+                        buttonTheme: { // styles for the buttons
+                            width: 50,
+                            fill: 'none',
+                            stroke: 'none',
+                            style: {
+                                color: '#039',
+                                fontWeight: 'bold',
+                            },
+                            states: {
+                                hover: {
+                                    fill: 'white'
+                                },
+                                select: {
+                                    style: {
+                                        color: 'white'
+                                    }
+                                }
+                            }
+                        },
+                        selected: 0
+                        
+                    },
+
+                    title: {
+                        text: 'Mentions Visualization'
+                    },
+
+                    xAxis: {
+                        maxZoom: 3600000
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: ''
+                        }
+                    },
+                    credits: false,
+                    series: [{
+                        name: 'Mentions',
+                        data: data,
+                        type: 'areaspline',
+                        threshold: null
+                    }]
+                    });
+            }
+            
+            var url ="/api";
+            api_call = function(key, value) {
+                console.log(key, value);
+                $.ajax({
+                    url: "/api/?"+key+"="+value,
+                    ype: 'GET',
+                    dataType: 'json',
+                    timeout: 2000,
+                    error: function() {
+                    },
+                    success: function(report) {
+                    }
+                });
+            }
+            
+            $(".filters select").change(function () {
+                $.each($(".filters select").not(this), function(i, val) {
+                    $(val[0]).attr('selected', 'selected');
+                });
+                var i = this.value.indexOf("&"),
+                    key = this.value.slice(0, i),
+                    value = this.value.slice(i+1);
+                api_call(key, value);
+            });
+
+            create_chart();
+        });
+    </script>
 <body>
-    {% for platform in filters.platform %}
-        {{ platform }}
-    {% endfor %}
+    <div class="container">
+        <div class="header">
+            <div class="title">
+                <img src="http://d284gtceqi4kf4.cloudfront.net/ubervu_public/static/ubervu_public/img/other/logo.png" />
+                <span style="margin-left: 50px;">
+                    Real Time Social Media Monitoring
+                </span>
+            </div>
+        </div>
+        <div class="content-parent">
+            <div class="content">
+                <div class="filters">
+                    <div class="keyword">
+                        Select keyord:
+                    </div>
+                    <div class="limit"> (Only a filter can be applied at a time)</div>
+                    {% for filter in filters %}
+                    <div class="filter">
+                        <span>{{ filter|capfirst }}:</span>
+                        <select>
+                        {% for key in filters|hash:filter %}
+                            <option value="{{ filter }}&{{ key }}">{{ key|capfirst }}</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div id="mentions-graph" style="height:410px; margin: 0 2em; min-width: 700px">
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 
