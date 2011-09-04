@@ -1,6 +1,9 @@
 from django.conf import settings
 import urllib
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 from time import mktime
 from datetime import datetime, time, timedelta
 from collections import defaultdict
