@@ -9,4 +9,6 @@ filters = {
 streams = {
         ('Radian 6', 'radian6'),
         ('Ubervu', 'ubervu'),
+        ('Seesmic', 'seesmic'),
+        ('Python', 'python'),
     }
