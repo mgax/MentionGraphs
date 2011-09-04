@@ -67,22 +67,18 @@ class MentionCounter(object):
         self.resolution = resolution
 
     def count(self, target_date):
-        return index_day(self.keyword, target_date, self.resolution)
+        day_start = datetime.combine(target_date, time())
+        t0 = to_epoch(day_start)
+        t = end_of_day_epoch(target_date)
+        res_seconds = self.resolution.total_seconds()
+        n_buckets = int(24*60*60/res_seconds)
+        day_buckets = [defaultdict(int) for i in range(n_buckets)]
 
+        for mention in mention_stream_for_interval(self.keyword, t0, t):
+            time_in_day = mention['published'] - t0
+            bucket = day_buckets[int(time_in_day / res_seconds)]
+            for field in STATS_FIELDS:
+                bucket[field, mention[field]] += 1
 
-def index_day(keyword, target_date, resolution):
-    day_start = datetime.combine(target_date, time())
-    t0 = to_epoch(day_start)
-    t = end_of_day_epoch(target_date)
-    res_seconds = resolution.total_seconds()
-    n_buckets = int(24*60*60/res_seconds)
-    day_buckets = [defaultdict(int) for i in range(n_buckets)]
-
-    for mention in mention_stream_for_interval(keyword, t0, t):
-        time_in_day = mention['published'] - t0
-        bucket = day_buckets[int(time_in_day / res_seconds)]
-        for field in STATS_FIELDS:
-            bucket[field, mention[field]] += 1
-
-    return {day_start + resolution * i: day_buckets[i]
-            for i in range(n_buckets)}
+        return {day_start + self.resolution * i: day_buckets[i]
+                for i in range(n_buckets)}
