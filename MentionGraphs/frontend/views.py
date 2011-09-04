@@ -54,9 +54,13 @@ def api(request):
         else:
             dataset = Datapoint.objects.filter(keyword=keyword_model, metric=None).order_by('time')
 
-        response = []
-        for item in dataset.reverse()[:24*30*3]:
-            response.insert(0,[epoch(item.time), item.count])
+        from datetime import date, time, datetime, timedelta
+        dataset_dict = {dp.time: dp.count for dp in dataset}
+        resolution = timedelta(hours=1)
+        t0 = datetime.combine(date.today() - timedelta(days=90), time())
+        times = (t0 + resolution * i for i in range(24 * 90))
+        response = [[epoch(t), dataset_dict.get(t, 0)] for t in times]
+
         return HttpResponse(json.dumps(response), mimetype="application/json")
         
     except Exception, e:
