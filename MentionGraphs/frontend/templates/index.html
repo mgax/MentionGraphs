@@ -95,15 +95,14 @@
     <script type="text/javascript" src="https://raw.github.com/highslide-software/highcharts.com/stock2/js/highstock.src.js"></script>
 
     <script type="text/javascript">
-        var chart,
-            date = 1306886400000,
-            data = [];
-            for (i=0; i<2200; ++i)
-                data.push([date+3600*i*1000, Math.round(Math.random()*1000)]);
-        //Highcharts.theme = { colors: ['#4572A7'] };
-        $(function() {
-            function create_chart() {
-                window.chart = new Highcharts.StockChart({
+        
+        var date = 1306886400000,
+        data = [],
+            i;
+        for (i=0; i<2200; ++i)
+            data.push([date+3600*i*1000, Math.round(Math.random()*1000)]);
+                
+        var chart_historic = {
                     chart: {
                         renderTo: 'historic-graph'
                     },
@@ -180,7 +179,14 @@
                         type: 'areaspline',
                         threshold: null
                     }]
-                    });
+                    }
+
+        var chart_realtime = $.extend(true, {}, chart_historic);
+        chart_realtime.chart.renderTo = 'realtime-graph';
+        //Highcharts.theme = { colors: ['#4572A7'] };
+        $(function() {
+            function create_chart() {
+                window.chart = new Highcharts.StockChart(chart_historic);
             }
             
             var url ="/api";
