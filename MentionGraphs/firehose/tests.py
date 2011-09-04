@@ -133,7 +133,7 @@ class CrawlingTest(TestCase):
                                     resolution=timedelta(hours=1),
                                     cache_root='/tmp/cache/path')
         self.assertEqual(cmc.cache_filename_base(date(2011, 9, 3)),
-                         '/tmp/cache/path/3600/python/2011-09-03')
+                         '/tmp/cache/path/python/2011-09-03')
 
 
 class SaveToDatabaseTest(TestCase):

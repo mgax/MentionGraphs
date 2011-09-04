@@ -97,10 +97,7 @@ class CachingMentionCounter(MentionCounter):
         super(CachingMentionCounter, self).__init__(**kwargs)
 
     def cache_filename_base(self, day):
-        return os.path.join(self.cache_root,
-                            str(int(self.resolution.total_seconds())),
-                            self.keyword,
-                            str(day))
+        return os.path.join(self.cache_root, self.keyword, str(day))
 
     def stream_for_day(self, day):
         cache_filename = self.cache_filename_base(day) + '.json.gz'
