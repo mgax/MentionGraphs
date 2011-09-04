@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
-from MentionGraphs.firehose.models import Datapoint
+from MentionGraphs.firehose.models import Datapoint, Keyword, Metric
 import datetime
 import json
 import time
@@ -17,27 +17,21 @@ def epoch(value):
         return ''
 
 def api(request):
-    params = request.GET
-#    since = params['since']
-#    until = params['until']
-#    query = params['q']
-    vmetric = params['metric']
+    for k,v in request.GET.items():
+        if k == 'stream':
+            q = v
+        else:
+            metric_name = k
+            metric_value = v 
     
-#    import pdb;pdb.set_trace()
-    dataset = Datapoint.objects.filter(
-#	time__gte=since
-#    ).filter(
-#	time__lt=until
-#    ).filter(
-        metric.name=vmetric
-    )
+    keyword_model = Keyword.objects.filter(name=q)
+    metric_model = Metric.objects.filter(name=metric_name, value=metric_value)
+    dataset = Datapoint.objects.filter(keyword=keyword_model, metric=metric_model)
+    
+    print dataset
     response = []
     for item in dataset:
        entry={}
-#       entry['DATE']=item.time.strftime('%d-%m-%Y')
-#       entry['TIME']=item.time.strftime('%H:%M:%S')
-#       entry['VOLUME']=item.value
        entry[epoch(item.time)]=item.count
-       print(item.time.strftime('%Y'))
        response.append(entry)
     return HttpResponse(json.dumps(response), mimetype="application/json")
