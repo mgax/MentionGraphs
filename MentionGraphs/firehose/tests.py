@@ -99,3 +99,29 @@ class CrawlingTest(TestCase):
         bucket1 = stats[datetime.combine(day, time(1))]
         self.assertEqual(bucket1['language', 'german'], 2)
         self.assertEqual(bucket1['language', 'french'], 1)
+
+
+class SaveToDatabaseTest(TestCase):
+
+    def test_dump_results(self):
+        from crawl import to_epoch
+        from models import Metric, Datapoint, save_data
+
+        day = date(2011, 9, 3)
+        eday = to_epoch(day)
+        when = datetime.combine(day, time())
+        data = {
+            when: {
+                ('language', 'english'): 13,
+                ('language', 'german'): 22,
+            }
+        }
+
+        save_data('python', data)
+
+        self.assertEqual(Datapoint.objects.count(), 2)
+        m_german = Metric.objects.get(name='language', value='german')
+        dp_german = Datapoint.objects.get(metric=m_german)
+        self.assertEqual(dp_german.time, when)
+        self.assertEqual(dp_german.keyword.name, 'python')
+        self.assertEqual(dp_german.count, 22)
