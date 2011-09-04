@@ -1,6 +1,9 @@
 from django.conf import settings
 import urllib
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 from time import mktime
 from datetime import datetime, time, timedelta
 from collections import defaultdict
@@ -84,6 +87,7 @@ class MentionCounter(object):
             bucket = day_buckets[int(time_in_day / res_seconds)]
             for field in STATS_FIELDS:
                 bucket[field, mention.get(field, None)] += 1
+            bucket[None] += 1
 
         return {day_start + self.resolution * i: day_buckets[i]
                 for i in range(n_buckets)}
@@ -105,20 +109,28 @@ class CachingMentionCounter(MentionCounter):
             log.info('found stream in cache: %r on %s', self.keyword, day)
 
             with gzip.open(cache_filename, 'rb') as f:
-                return json.load(f)
+                for mention in json.load(f):
+                    yield mention
 
         else:
-            data = list(super(CachingMentionCounter, self).stream_for_day(day))
-
             cache_file_dirname = os.path.dirname(cache_filename)
             if not os.path.isdir(cache_file_dirname):
                 os.makedirs(cache_file_dirname)
 
             tmp_cache_filename = cache_filename + '.tmp'
             with gzip.open(tmp_cache_filename, 'wb') as f:
-                json.dump(data, f)
+                f.write('[')
+                first = True
+
+                stream = super(CachingMentionCounter, self).stream_for_day(day)
+                for mention in stream:
+                    if not first:
+                        f.write(', ')
+                    json.dump(mention, f)
+                    yield mention
+
+                f.write(']')
+
             os.rename(tmp_cache_filename, cache_filename)
 
             log.info('cached stream for %r on %s', self.keyword, day)
-
-            return data
