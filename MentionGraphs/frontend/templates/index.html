@@ -97,12 +97,11 @@
     <script type="text/javascript">
         
         var date = 1306886400000,
-        data = [],
-            i;
+            data = [], i;
         for (i=0; i<2200; ++i)
             data.push([date+3600*i*1000, Math.round(Math.random()*1000)]);
                 
-        var chart_historic = {
+        var chart_basic = {
                     chart: {
                         renderTo: 'historic-graph'
                     },
@@ -168,6 +167,7 @@
                     },
                     yAxis: {
                         min: 0,
+                        allowDecimals: false,
                         title: {
                             text: ''
                         }
@@ -181,24 +181,39 @@
                     }]
                     }
 
-        var chart_realtime = $.extend(true, {}, chart_historic);
+        var chart_historic = $.extend(true, {}, chart_basic);  chart_realtime = $.extend(true, {}, chart_basic);
         chart_realtime.chart.renderTo = 'realtime-graph';
         //Highcharts.theme = { colors: ['#4572A7'] };
         $(function() {
             function create_chart() {
-                window.chart = new Highcharts.StockChart(chart_historic);
+                window.chart1 = new Highcharts.StockChart(chart_historic);
             }
             
             var url ="/api";
-            api_call = function(key, value, stream) {
+            api_call = function(stream, key, value) {
+                console.log(stream, key, value);
+                var params = stream;
+                if (key && value) {
+                    params += "&"+key+"="+value;
+                }
                 $.ajax({
-                    url: "/api/?"+"stream="+stream+"&"+key+"="+value,
-                    ype: 'GET',
+                    url: "/api/?stream="+params,
+                    type: 'GET',
                     dataType: 'json',
                     timeout: 2000,
                     error: function() {
+                        $("#historic-graph").html("<div class=\"error\">There are no mentions for selected filters!</div>");
                     },
-                    success: function(report) {
+                    success: function(data) {
+                        if (data.length === 0) {
+                            $("#historic-graph").html("<div class=\"error\">There are no mentions for selected filters!</div>");
+                        }
+                        else {
+                            var chart = $.extend(true, {}, chart_basic);
+                            chart.series[0].data = data;
+                            $("#historic-graph").html("");
+                            chart1 = new Highcharts.StockChart(chart);
+                        }
                     }
                 });
             }
@@ -207,24 +222,31 @@
                 $.each($(".filters .filter select").not(this), function(i, val) {
                     $(val[0]).attr('selected', 'selected');
                 });
+                console.log($(this),$(this).index());
+                if ($(this).parent().index() === 0) {
+                    api_call(stream);
+                    return;
+                }
                 var i = this.value.indexOf("&"),
                     key = this.value.slice(0, i),
                     value = this.value.slice(i+1),
                     stream = $(".filters .keyword option:selected").val();
-                api_call(key, value, stream);
+                api_call(stream, key, value);
             });
 
             $(".filters .keyword select").change(function () {
-                var filter;
+                var filter, i, key, value;
                 $.each($(".filters .filter option:selected"), function(i, val) {
                     if ($(val).index() !== 0)
                         filter = $(val).val();
                 });
-                var i = filter.indexOf("&"),
+                var stream = $(".filters .keyword option:selected").val();
+                if (filter) {
+                    i = filter.indexOf("&"),
                     key = filter.slice(0, i),
-                    value = filter.slice(i+1),
-                    stream = $(".filters .keyword option:selected").val();
-                api_call(key, value, stream);
+                    value = filter.slice(i+1);
+                }
+                api_call(stream, key, value);
             });
 
             create_chart();

@@ -7,7 +7,6 @@ filters = {
         'reach': ['all', 'XS', 'S', 'M', 'L', 'XL', 'XXL'],
     }
 streams = {
-        ('RadianSix', 'radiansix'),
-        ('Apple', 'apple'),
-        ('Ice Coca Cola', 'coca cola'),
+        ('Radian 6', 'radian6'),
+        ('Ubervu', 'ubervu'),
     }
