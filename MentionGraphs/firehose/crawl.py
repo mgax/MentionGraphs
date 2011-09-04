@@ -38,8 +38,7 @@ def do_api_call(keyword, since, until):
     data = json.load(response)
     response.close()
 
-    for mention in data['results']:
-        yield {k: mention.get(k, None) for k in FIELDS}
+    return data['results']
 
 def mention_stream_for_interval(keyword, since, until):
     log.info("Crawling mentions for %r (%r -> %r)", keyword, since, until)
@@ -84,7 +83,7 @@ class MentionCounter(object):
             time_in_day = mention['published'] - t0
             bucket = day_buckets[int(time_in_day / res_seconds)]
             for field in STATS_FIELDS:
-                bucket[field, mention[field]] += 1
+                bucket[field, mention.get(field, None)] += 1
 
         return {day_start + self.resolution * i: day_buckets[i]
                 for i in range(n_buckets)}
