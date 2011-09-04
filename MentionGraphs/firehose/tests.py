@@ -56,16 +56,15 @@ class CrawlingTest(TestCase):
         self._mock_call.return_value = data
 
     def test_crawl_one_day_one_call(self):
-        from crawl import index_day
+        from crawl import MentionCounter
         self.api_fixture([
             _mention(1315051701, 'english', 'twitter', 'neutral'),
             _mention(1315051704, 'german', 'twitter', 'positive'),
             _mention(1315051708, 'english', 'facebook', 'negative'),
         ])
 
-        stats = index_day('python', date(2011, 9, 3), timedelta(days=1))
-
-        bucket = stats.values()[0]
+        counter = MentionCounter('python', timedelta(days=1))
+        bucket = counter.count(date(2011, 9, 3)).values()[0]
 
         self.assertEqual(bucket['language', 'english'], 2)
         self.assertEqual(bucket['language', 'german'], 1)
@@ -76,7 +75,7 @@ class CrawlingTest(TestCase):
         self.assertEqual(bucket['sentiment', 'positive'], 1)
 
     def test_split_into_intervals(self):
-        from crawl import index_day, to_epoch
+        from crawl import MentionCounter, to_epoch
 
         day = date(2011, 9, 3)
         eday = to_epoch(day)
@@ -90,7 +89,7 @@ class CrawlingTest(TestCase):
             _mention(eday + 60 * 110, 'french'),
         ])
 
-        stats = index_day('python', day, timedelta(hours=1))
+        stats = MentionCounter('python', timedelta(hours=1)).count(day)
 
         bucket0 = stats[datetime.combine(day, time())]
         self.assertEqual(bucket0['language', 'english'], 2)
@@ -99,6 +98,42 @@ class CrawlingTest(TestCase):
         bucket1 = stats[datetime.combine(day, time(1))]
         self.assertEqual(bucket1['language', 'german'], 2)
         self.assertEqual(bucket1['language', 'french'], 1)
+
+    def test_caching(self):
+        from crawl import CachingMentionCounter, to_epoch
+        from tempfile import mkdtemp
+        import shutil
+
+        day = date(2011, 9, 3)
+        self.api_fixture([_mention(to_epoch(day) + 60 * 20, 'english')])
+
+        cache_root = mkdtemp()
+        try:
+            cmc = CachingMentionCounter(keyword='python',
+                                        resolution=timedelta(days=1),
+                                        cache_root=cache_root)
+            stats1 = cmc.count(day)
+            stats2 = cmc.count(day)
+
+        finally:
+            shutil.rmtree(cache_root)
+
+        stats_ok = {datetime.combine(day, time()): {
+            ('sentiment', None): 1,
+            ('generator', 'twitter'): 1,
+            ('language', 'english'): 1,
+        }}
+        self.assertEqual(stats1, stats_ok)
+        self.assertEqual(stats2, stats_ok)
+        self.assertEqual(self._mock_call.call_count, 1)
+
+    def test_cache_filename(self):
+        from crawl import CachingMentionCounter, to_epoch
+        cmc = CachingMentionCounter(keyword='python',
+                                    resolution=timedelta(hours=1),
+                                    cache_root='/tmp/cache/path')
+        self.assertEqual(cmc.cache_filename_base(date(2011, 9, 3)),
+                         '/tmp/cache/path/python/2011-09-03')
 
 
 class SaveToDatabaseTest(TestCase):

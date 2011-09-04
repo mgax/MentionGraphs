@@ -7,7 +7,7 @@ class Keyword(models.Model):
 
 class Metric(models.Model):
     name = models.CharField(max_length=255)
-    value = models.CharField(max_length=255)
+    value = models.CharField(max_length=255, null=True)
 
 
 class Datapoint(models.Model):

@@ -7,6 +7,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 import MentionGraphs.frontend.admin
+import MentionGraphs.firehose.admin
 
 urlpatterns = patterns('',
     # Examples:
