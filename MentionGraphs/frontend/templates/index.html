@@ -47,9 +47,22 @@
             box-shadow: 0 0 6px 2px #888;
             background-color: #fff;
         }
+        .historic-monitor .title {
+            width: 80%;
+            margin: 0px auto;
+            border-bottom: 1px solid #ccc;
+            color: darkblue;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 25px;
+            font-weight: bolder;
+        }
         .filters {
             float: left;
             margin-left: 10px;
+            padding-right: 10px;
+            border-right: 1px solid #ccc;
+            height: 400px;
         }
         .filters .filter span {
             width: 90px;
@@ -62,11 +75,12 @@
         .filters .limit {
             font-size: 12px;
             color: red;
+            margin-bottom: 50px;
         }
         .clearboth {
             clear: both;
         }
-        #mentions-graph {
+        #historic-graph {
             float: left;
         }
     </style>
@@ -84,7 +98,7 @@
             function create_chart() {
                 window.chart = new Highcharts.StockChart({
                     chart: {
-                        renderTo: 'mentions-graph'
+                        renderTo: 'historic-graph'
                     },
 
                     rangeSelector: {
@@ -140,7 +154,7 @@
                     },
 
                     title: {
-                        text: 'Mentions Visualization'
+                        text: ''
                     },
 
                     xAxis: {
@@ -216,6 +230,9 @@
         <div class="content-parent">
             <div class="content">
                 <div class="historic-monitor">
+                    <div class="title" align="center">
+                        Historical Data
+                    </div>
                     <div class="filters">
                         <div class="keyword">
                             Select <span style="font-weight:bolder; font-size:18px; color: #000;">stream</span>:
@@ -238,7 +255,11 @@
                         {% endfor %}
                     </div>
                     
-                    <div id="mentions-graph" style="height:410px; margin: 0 2em; min-width: 700px">
+                    <div id="historic-graph" style="height:420px; margin: 0 2em; min-width: 700px">
+                    </div>
+                </div>
+                <div class="realtime-monitor">
+                    <div id="realtime-graph" style="height:420px; margin: 0 2em; min-width: 700px">
                     </div>
                 </div>
             </div>
