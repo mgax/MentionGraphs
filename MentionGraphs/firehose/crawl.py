@@ -5,6 +5,7 @@ from time import mktime
 from datetime import datetime, time, timedelta
 from collections import defaultdict
 import logging
+import os.path
 
 log = logging.getLogger(__name__)
 
@@ -86,3 +87,16 @@ class MentionCounter(object):
 
         return {day_start + self.resolution * i: day_buckets[i]
                 for i in range(n_buckets)}
+
+
+class CachingMentionCounter(MentionCounter):
+
+    def __init__(self, cache_root, **kwargs):
+        self.cache_root = cache_root
+        super(CachingMentionCounter, self).__init__(**kwargs)
+
+    def cache_filename_base(self, day):
+        return os.path.join(self.cache_root,
+                            str(int(self.resolution.total_seconds())),
+                            self.keyword,
+                            str(day))

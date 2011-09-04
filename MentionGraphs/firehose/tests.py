@@ -99,6 +99,14 @@ class CrawlingTest(TestCase):
         self.assertEqual(bucket1['language', 'german'], 2)
         self.assertEqual(bucket1['language', 'french'], 1)
 
+    def test_cache_filename(self):
+        from crawl import CachingMentionCounter, to_epoch
+        cmc = CachingMentionCounter(keyword='python',
+                                    resolution=timedelta(hours=1),
+                                    cache_root='/tmp/cache/path')
+        self.assertEqual(cmc.cache_filename_base(date(2011, 9, 3)),
+                         '/tmp/cache/path/3600/python/2011-09-03')
+
 
 class SaveToDatabaseTest(TestCase):
 
