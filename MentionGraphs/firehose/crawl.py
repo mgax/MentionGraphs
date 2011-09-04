@@ -59,6 +59,17 @@ def mention_stream_for_interval(keyword, since, until):
 
     log.info("... finished counting %d mentions", total_mentions)
 
+
+class MentionCounter(object):
+
+    def __init__(self, keyword, resolution):
+        self.keyword = keyword
+        self.resolution = resolution
+
+    def count(self, target_date):
+        return index_day(self.keyword, target_date, self.resolution)
+
+
 def index_day(keyword, target_date, resolution):
     day_start = datetime.combine(target_date, time())
     t0 = to_epoch(day_start)
