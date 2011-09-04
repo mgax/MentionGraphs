@@ -6,6 +6,7 @@ from datetime import datetime, time, timedelta
 from collections import defaultdict
 import logging
 import os.path
+import gzip
 
 log = logging.getLogger(__name__)
 
@@ -100,3 +101,24 @@ class CachingMentionCounter(MentionCounter):
                             str(int(self.resolution.total_seconds())),
                             self.keyword,
                             str(day))
+
+    def stream_for_day(self, day):
+        cache_filename = self.cache_filename_base(day) + '.json.gz'
+
+        if os.path.isfile(cache_filename):
+            with gzip.open(cache_filename, 'rb') as f:
+                return json.load(f)
+
+        else:
+            data = list(super(CachingMentionCounter, self).stream_for_day(day))
+
+            cache_file_dirname = os.path.dirname(cache_filename)
+            if not os.path.isdir(cache_file_dirname):
+                os.makedirs(cache_file_dirname)
+
+            tmp_cache_filename = cache_filename + '.tmp'
+            with gzip.open(tmp_cache_filename, 'wb') as f:
+                json.dump(data, f)
+            os.rename(tmp_cache_filename, cache_filename)
+
+            return data
