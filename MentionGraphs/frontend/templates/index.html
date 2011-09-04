@@ -90,8 +90,12 @@
         #historic-graph {
             float: left;
         }
+        #realtime-graph {
+            float: left;
+        }
     </style>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://www.highcharts.com/js/highcharts.js"></script>
     <script type="text/javascript" src="https://raw.github.com/highslide-software/highcharts.com/stock2/js/highstock.src.js"></script>
 
     <script type="text/javascript">
@@ -179,11 +183,11 @@
                         type: 'areaspline',
                         threshold: null
                     }]
-                    }
+                    };
 
-        var chart basic_rt = {
+        var chart_basic_rt = {
               chart: {
-                 renderTo: 'container',
+                 renderTo: 'realtime-graph',
                  defaultSeriesType: 'spline',
                  marginRight: 10,
                  events: {
@@ -246,16 +250,16 @@
                     return data;
                  })()
               }]
-           });
-        }
+           }
         
         var chart_historic = $.extend(true, {}, chart_basic_his),
             chart_realtime = $.extend(true, {}, chart_basic_rt);
-        chart_realtime.chart.renderTo = 'realtime-graph';
+
         //Highcharts.theme = { colors: ['#4572A7'] };
         $(function() {
             function create_chart() {
                 window.chart1 = new Highcharts.StockChart(chart_historic);
+                window.chart2 = new Highcharts.StockChart(chart_realtime);
             }
             
             var url ="/api";
