@@ -15,4 +15,6 @@ def index(request):
 
 @require_GET
 def api(request):
-    return HttpResponse('Hello World')
+    for k, v in request.GET.items():
+        print k, v
+    return HttpResponse(stream)
