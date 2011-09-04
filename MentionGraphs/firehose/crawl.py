@@ -10,6 +10,7 @@ from collections import defaultdict
 import logging
 import os.path
 import gzip
+from random import randint
 
 log = logging.getLogger(__name__)
 
@@ -117,7 +118,8 @@ class CachingMentionCounter(MentionCounter):
             if not os.path.isdir(cache_file_dirname):
                 os.makedirs(cache_file_dirname)
 
-            tmp_cache_filename = cache_filename + '.tmp'
+            tmp_cache_filename = (cache_filename +
+                                  '.%05d.tmp' % randint(0, 10000))
             with gzip.open(tmp_cache_filename, 'wb') as f:
                 f.write('[')
                 first = True
