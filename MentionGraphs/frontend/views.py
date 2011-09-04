@@ -22,8 +22,9 @@ def epoch(value):
 
 def index(request):
     context = {}
+    keyword = Keyword.objects.all()
     context['filters'] = filters
-    context['streams'] = streams
+    context['streams'] = keyword
     return render_to_response('index.html', context, context_instance=RequestContext(request))
 
 from django import template

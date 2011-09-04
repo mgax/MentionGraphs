@@ -11,4 +11,5 @@ streams = {
         ('Ubervu', 'ubervu'),
         ('Seesmic', 'seesmic'),
         ('Python', 'python'),
+        ('Apple', 'apple')
     }

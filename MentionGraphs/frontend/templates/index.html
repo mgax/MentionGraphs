@@ -285,7 +285,7 @@
                 });
             }
             
-            $(".filters .filter select").change(function () {
+            $(".historic-monitor .filters .filter select").change(function () {
                 $.each($(".filters .filter select").not(this), function(i, val) {
                     $(val[0]).attr('selected', 'selected');
                 });
@@ -300,7 +300,7 @@
                     api_call(stream, key, value);
             });
 
-            $(".filters .keyword select").change(function () {
+            $(".historic-monitor .filters .keyword select").change(function () {
                 var filter, i, key, value;
                 $.each($(".filters .filter option:selected"), function(i, val) {
                     if ($(val).index() !== 0)
@@ -339,8 +339,8 @@
                         <div class="keyword">
                             Select <span style="font-weight:bolder; font-size:18px; color: #000;">stream</span>:
                             <select>
-                                {% for stream_name, stream_value in streams %}
-                                    <option value="{{ stream_value }}">{{ stream_name }}</option>
+                                {% for stream in streams %}
+                                    <option value="{{ stream }}">{{ stream|capfirst }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -369,12 +369,12 @@
                             
                             <span style="font-weight:bolder; font-size:18px; color: #000;">Stream</span>:
                             <select>
-                                {% for stream_name, stream_value in streams %}
-                                    <option value="{{ stream_value }}">{{ stream_name }}</option>
+                                {% for stream in streams %}
+                                    <option value="{{ stream }}">{{ stream|capfirst }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="limit"> (Only a filter can be applied at a time)</div>
+                        <div class="limit"> (Can apply what filters do you want)</div>
                         {% for filter in filters %}
                         <div class="filter">
                             <span>{{ filter|capfirst }}:</span>
