@@ -21,7 +21,7 @@ class Metric(models.Model):
 class Datapoint(models.Model):
     keyword = models.ForeignKey(Keyword)
     time = models.DateTimeField()
-    metric = models.ForeignKey(Metric)
+    metric = models.ForeignKey(Metric, null=True)
     count = models.IntegerField()
 
     def __unicode__(self):
@@ -31,8 +31,12 @@ class Datapoint(models.Model):
 def save_data(keyword, data):
     k = Keyword.objects.get_or_create(name=keyword)[0]
     for when, bucket in data.iteritems():
-        for (m_name, m_value), count in bucket.iteritems():
-            m = Metric.objects.get_or_create(name=m_name, value=m_value)[0]
+        for metric, count in bucket.iteritems():
+            if metric is None:
+                m = None
+            else:
+                (m_name, m_value) = metric
+                m = Metric.objects.get_or_create(name=m_name, value=m_value)[0]
             Datapoint.objects.filter(keyword=k, metric=m, time=when).delete()
             dp = Datapoint(keyword=k, metric=m, time=when, count=count)
             dp.save()

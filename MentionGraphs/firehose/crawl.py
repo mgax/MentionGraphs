@@ -87,6 +87,7 @@ class MentionCounter(object):
             bucket = day_buckets[int(time_in_day / res_seconds)]
             for field in STATS_FIELDS:
                 bucket[field, mention.get(field, None)] += 1
+            bucket[None] += 1
 
         return {day_start + self.resolution * i: day_buckets[i]
                 for i in range(n_buckets)}

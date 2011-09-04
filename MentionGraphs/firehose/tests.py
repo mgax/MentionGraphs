@@ -99,6 +99,19 @@ class CrawlingTest(TestCase):
         self.assertEqual(bucket1['language', 'german'], 2)
         self.assertEqual(bucket1['language', 'french'], 1)
 
+    def test_totals(self):
+        from crawl import MentionCounter
+        self.api_fixture([
+            _mention(1315051701, 'english', 'twitter', 'neutral'),
+            _mention(1315051704, 'german', 'twitter', 'positive'),
+            _mention(1315051708, 'english', 'facebook', 'negative'),
+        ])
+
+        counter = MentionCounter('python', timedelta(days=1))
+        bucket = counter.count(date(2011, 9, 3)).values()[0]
+
+        self.assertEqual(bucket[None], 3)
+
     def test_caching(self):
         from crawl import CachingMentionCounter, to_epoch
         from tempfile import mkdtemp
@@ -122,6 +135,7 @@ class CrawlingTest(TestCase):
             ('sentiment', None): 1,
             ('generator', 'twitter'): 1,
             ('language', 'english'): 1,
+            None: 1
         }}
         self.assertEqual(stats1, stats_ok)
         self.assertEqual(stats2, stats_ok)
@@ -146,14 +160,18 @@ class SaveToDatabaseTest(TestCase):
         save_data('python', {when: {
             ('language', 'english'): 13,
             ('language', 'german'): 22,
+            None: 35,
         }})
 
-        self.assertEqual(Datapoint.objects.count(), 2)
+        self.assertEqual(Datapoint.objects.count(), 3)
         m_german = Metric.objects.get(name='language', value='german')
         dp_german = Datapoint.objects.get(metric=m_german)
         self.assertEqual(dp_german.time, when)
         self.assertEqual(dp_german.keyword.name, 'python')
         self.assertEqual(dp_german.count, 22)
+
+        dp_totals = Datapoint.objects.get(metric=None)
+        self.assertEqual(dp_totals.count, 35)
 
     def test_overwrite_previous(self):
         from crawl import to_epoch
