@@ -1,17 +1,25 @@
+from datetime import date, timedelta
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 from MentionGraphs.firehose.crawl import index_day
+from MentionGraphs.firehose.models import save_data
 
 class Command(BaseCommand):
     #args = '<poll_id poll_id ...>'
     help = 'Fetch data from the uberVU API'
 
-    def handle(self, keyword, day, **kwargs):
-        from pprint import pprint
-        from datetime import date, timedelta
+    def handle(self, keyword, day0, ndays, **kwargs):
+
         import logging
         l = logging.getLogger('MentionGraphs.firehose.crawl')
         l.setLevel(logging.INFO)
         l.addHandler(logging.StreamHandler(self.stderr))
 
-        day = date(*map(int, day.split('-')))
-        pprint(dict(index_day(keyword, day, timedelta(hours=1))))
+        day0 = date(*map(int, day0.split('-')))
+        resolution = timedelta(hours=1)
+
+        for c in range(int(ndays)):
+            day = day0 + timedelta(days=c)
+            data = index_day(keyword, day, resolution)
+            with transaction.commit_on_success():
+                save_data(keyword, data)
