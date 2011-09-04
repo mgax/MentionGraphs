@@ -21,5 +21,6 @@ def save_data(keyword, data):
     for when, bucket in data.iteritems():
         for (m_name, m_value), count in bucket.iteritems():
             m = Metric.objects.get_or_create(name=m_name, value=m_value)[0]
+            Datapoint.objects.filter(keyword=k, metric=m, time=when).delete()
             dp = Datapoint(keyword=k, metric=m, time=when, count=count)
             dp.save()

@@ -125,3 +125,25 @@ class SaveToDatabaseTest(TestCase):
         self.assertEqual(dp_german.time, when)
         self.assertEqual(dp_german.keyword.name, 'python')
         self.assertEqual(dp_german.count, 22)
+
+    def test_overwrite_previous(self):
+        from crawl import to_epoch
+        from models import Metric, Datapoint, save_data
+
+        day = date(2011, 9, 3)
+        eday = to_epoch(day)
+        when = datetime.combine(day, time())
+
+        save_data('python', {when: {
+            ('language', 'german'): 45,
+        }})
+
+        save_data('python', {when: {
+            ('language', 'english'): 13,
+            ('language', 'german'): 22,
+        }})
+
+        m_german = Metric.objects.get(name='language', value='german')
+
+        self.assertEqual(Datapoint.objects.count(), 2)
+        self.assertEqual(Datapoint.objects.get(metric=m_german).count, 22)
