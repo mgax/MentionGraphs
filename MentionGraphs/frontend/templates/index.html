@@ -191,11 +191,11 @@
             
             var url ="/api";
             api_call = function(stream, key, value) {
-                console.log(stream, key, value);
                 var params = stream;
                 if (key && value) {
                     params += "&"+key+"="+value;
                 }
+
                 $.ajax({
                     url: "/api/?stream="+params,
                     type: 'GET',
@@ -222,16 +222,15 @@
                 $.each($(".filters .filter select").not(this), function(i, val) {
                     $(val[0]).attr('selected', 'selected');
                 });
-                console.log($(this),$(this).index());
-                if ($(this).parent().index() === 0) {
-                    api_call(stream);
-                    return;
-                }
+
                 var i = this.value.indexOf("&"),
                     key = this.value.slice(0, i),
                     value = this.value.slice(i+1),
                     stream = $(".filters .keyword option:selected").val();
-                api_call(stream, key, value);
+                if (value === 'all')
+                    api_call(stream);
+                else
+                    api_call(stream, key, value);
             });
 
             $(".filters .keyword select").change(function () {

@@ -52,7 +52,7 @@ def api(request):
             metric_model = Metric.objects.filter(name=metric_name, value=metric_value)
             dataset = Datapoint.objects.filter(keyword=keyword_model, metric=metric_model).order_by('time')
         else:
-            dataset = Datapoint.objects.filter(keyword=keyword_model).order_by('time')
+            dataset = Datapoint.objects.filter(keyword=keyword_model, metric=None).order_by('time')
 
         response = []
         for item in dataset.reverse()[:24*30*3]:
