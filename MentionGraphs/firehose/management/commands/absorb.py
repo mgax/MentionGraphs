@@ -1,9 +1,13 @@
 from datetime import date, timedelta
+import logging
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from django.db import transaction
 from MentionGraphs.firehose.crawl import CachingMentionCounter
 from MentionGraphs.firehose.models import save_data
+
+
+log = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     #args = '<poll_id poll_id ...>'
@@ -11,10 +15,12 @@ class Command(BaseCommand):
 
     def handle(self, keyword, day_start, n_days, n_workers, **kwargs):
 
-        import logging
-        l = logging.getLogger('MentionGraphs.firehose.crawl')
-        l.setLevel(logging.INFO)
-        l.addHandler(logging.StreamHandler(self.stderr))
+        stderr_handler = logging.StreamHandler(self.stderr)
+        crawl_log = logging.getLogger('MentionGraphs.firehose.crawl')
+        crawl_log.setLevel(logging.INFO)
+        crawl_log.addHandler(stderr_handler)
+        log.setLevel(logging.INFO)
+        log.addHandler(stderr_handler)
 
         resolution = timedelta(hours=1)
 
@@ -32,17 +38,18 @@ class Command(BaseCommand):
 def import_with_workers(counter, days, n_workers):
     from multiprocessing.pool import ThreadPool
 
-    print "starting %d workers" % n_workers
+    log.info("starting %d workers", n_workers)
     pool = ThreadPool(processes=n_workers)
     for day in days:
         pool.apply_async(import_one_day, (counter, day))
-    print "jobs submitted, waiting..."
+    log.info("jobs submitted, waiting...")
     pool.close()
     pool.join()
-    print "done"
+    log.info("jobs done")
 
 
 def import_one_day(counter, day):
     data = counter.count(day)
     with transaction.commit_on_success():
         save_data(counter.keyword, data)
+    log.info("saved datapoints for %r at %s", counter.keyword, day)
