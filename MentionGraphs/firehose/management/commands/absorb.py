@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from MentionGraphs.firehose.crawl import index_day
+from MentionGraphs.firehose.crawl import MentionCounter
 from MentionGraphs.firehose.models import save_data
 
 class Command(BaseCommand):
@@ -20,6 +20,6 @@ class Command(BaseCommand):
 
         for c in range(int(ndays)):
             day = day0 + timedelta(days=c)
-            data = index_day(keyword, day, resolution)
+            data = MentionCounter(keyword, resolution).count(day)
             with transaction.commit_on_success():
                 save_data(keyword, data)
