@@ -9,7 +9,7 @@ class Command(BaseCommand):
     #args = '<poll_id poll_id ...>'
     help = 'Fetch data from the uberVU API'
 
-    def handle(self, keyword, day_start, ndays, **kwargs):
+    def handle(self, keyword, day_start, n_days, n_workers, **kwargs):
 
         import logging
         l = logging.getLogger('MentionGraphs.firehose.crawl')
@@ -18,15 +18,31 @@ class Command(BaseCommand):
 
         resolution = timedelta(hours=1)
 
+        day0 = date(*map(int, day_start.split('-')))
+        days = [day0 + timedelta(days=c) for c in range(int(n_days))]
+
         counter = CachingMentionCounter(
             keyword=keyword,
             resolution=resolution,
             cache_root=settings.FIREHOSE_DOWNLOAD_CACHE)
 
-        day0 = date(*map(int, day_start.split('-')))
+        import_with_workers(counter, days, int(n_workers))
 
-        for c in range(int(ndays)):
-            day = day0 + timedelta(days=c)
-            data = counter.count(day)
-            with transaction.commit_on_success():
-                save_data(keyword, data)
+
+def import_with_workers(counter, days, n_workers):
+    from multiprocessing.pool import ThreadPool
+
+    print "starting %d workers" % n_workers
+    pool = ThreadPool(processes=n_workers)
+    for day in days:
+        pool.apply_async(import_one_day, (counter, day))
+    print "jobs submitted, waiting..."
+    pool.close()
+    pool.join()
+    print "done"
+
+
+def import_one_day(counter, day):
+    data = counter.count(day)
+    with transaction.commit_on_success():
+        save_data(counter.keyword, data)
