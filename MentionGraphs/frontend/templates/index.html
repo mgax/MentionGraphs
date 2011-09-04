@@ -62,7 +62,7 @@
             font-weight: bolder;
         }
         .realtime-monitor {
-            margin-top: 100px;
+            margin-top: 50px;
         }
         .filters {
             float: left;
@@ -99,11 +99,6 @@
     <script type="text/javascript" src="https://raw.github.com/highslide-software/highcharts.com/stock2/js/highstock.src.js"></script>
 
     <script type="text/javascript">
-        
-        var date = 1306886400000,
-            data = [], i;
-        for (i=0; i<2200; ++i)
-            data.push([date+3600*i*1000, Math.round(Math.random()*1000)]);
                 
         var chart_basic_his = {
                     chart: {
@@ -179,7 +174,7 @@
                     credits: false,
                     series: [{
                         name: 'Mentions',
-                        data: data,
+                        data: [],
                         type: 'areaspline',
                         threshold: null
                     }]
@@ -204,7 +199,7 @@
                  }
               },
               title: {
-                 text: 'Live random data'
+                 text: 'Live data'
               },
               xAxis: {
                  type: 'datetime',
@@ -258,12 +253,11 @@
         //Highcharts.theme = { colors: ['#4572A7'] };
         $(function() {
             function create_chart() {
-                window.chart1 = new Highcharts.StockChart(chart_historic);
                 window.chart2 = new Highcharts.StockChart(chart_realtime);
             }
             
-            var url ="/api";
-            api_call = function(stream, key, value) {
+            var url ="/api",
+                api_call = function(stream, key, value) {
                 var params = stream;
                 if (key && value) {
                     params += "&"+key+"="+value;
@@ -282,7 +276,7 @@
                             $("#historic-graph").html("<div class=\"error\">There are no mentions for selected filters!</div>");
                         }
                         else {
-                            var chart = $.extend(true, {}, chart_basic);
+                            var chart = $.extend(true, {}, chart_basic_his);
                             chart.series[0].data = data;
                             $("#historic-graph").html("");
                             chart1 = new Highcharts.StockChart(chart);
@@ -322,6 +316,7 @@
             });
 
             create_chart();
+            api_call($(".filters .keyword option:selected").val());
         });
     </script>
 <body>
